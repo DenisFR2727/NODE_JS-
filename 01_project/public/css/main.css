@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+.main-header {
+  width: 100%;
+  height: 3.5rem;
+  background-color: blanchedalmond;
+}
+.main-header__nav {
+  height: 100%;
+
+  .main-header__item-list {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    gap: 10px;
+    list-style: none;
+
+    .main-header__item a {
+      text-decoration: none;
+      color: rgb(7, 109, 198);
+    }
+  }
+}
+.shop_bg {
+  background-color: rgba(234, 133, 1, 0.904);
+}
+.toggle_bg {
+  background-color: rgb(16, 227, 227);
+}

@@ -1,27 +1,42 @@
 // const http = require("http");
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
+const expressHbs = require("express-handlebars");
+
+const adminData = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
+const userRoutes = require("./routes/user");
 
 const app = express();
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
+// app.engine("hbs", expressHbs()); // вказуємо який шаблон використовувати
+app.engine(
+  "hbs",
+  expressHbs.engine({
+    extname: ".hbs",
+    layoutsDir: "views/layouts/",
+    defaultLayout: "main-layouts",
+  }),
+);
+app.set("view engine", "hbs"); // вказуємо який шаблон використовувати
+app.set("views", "views"); // вказуємо папку в якій знаходяться шаблони
 
 app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "scripts")));
 
-app.use("/admin", adminRoutes);
+app.use("/admin", adminData.routes);
 app.use(shopRoutes);
+app.use(userRoutes);
 
 app.use((req, res, next) => {
-  res.status(404).sendFile(path.join(__dirname, "views", "not-found.html"));
+  res.status(404).render("404", { pageTitle: "NotFound" });
 });
 
 app.listen(3001);
-
+// sendFile(path.join(__dirname, "views", "not-found.html"));
 // { extended: false } - що б він міг розбирати функції які не використовуються за замовчуванням
 // __dirname → абсолютний шлях до папки файлу
 

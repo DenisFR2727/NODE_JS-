@@ -51,7 +51,6 @@ const requestHandler = (req, res) => {
 
   res.end();
 };
-і
 module.exports = {
   handler: requestHandler,
 };

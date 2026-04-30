@@ -2,7 +2,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
-const expressHbs = require("express-handlebars");
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -10,16 +9,7 @@ const userRoutes = require("./routes/user");
 
 const app = express();
 
-// app.engine("hbs", expressHbs()); // вказуємо який шаблон використовувати
-app.engine(
-  "hbs",
-  expressHbs.engine({
-    extname: ".hbs",
-    layoutsDir: "views/layouts/",
-    defaultLayout: "main-layouts",
-  }),
-);
-app.set("view engine", "hbs"); // вказуємо який шаблон використовувати
+app.set("view engine", "ejs"); // вказуємо який шаблон використовувати
 app.set("views", "views"); // вказуємо папку в якій знаходяться шаблони
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -57,3 +47,15 @@ app.listen(3001);
 // res.send("<h1>The Add  Product Page</h1>"); // Дозволяє приєднати тіло будь-якого типу.
 
 //  res.status() = код статусу який
+
+// const expressHbs = require("express-handlebars");
+
+// app.engine("hbs", expressHbs()); // вказуємо який шаблон використовувати
+// app.engine(
+//   "hbs",
+//   expressHbs.engine({
+//     extname: ".hbs",
+//     layoutsDir: "views/layouts/",
+//     defaultLayout: "main-layouts",
+//   }),
+// );

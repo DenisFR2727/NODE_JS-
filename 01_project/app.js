@@ -7,14 +7,14 @@ const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const userRoutes = require("./routes/user");
 
-const app = express();
+const app = express(); // створюємо екземпляр express
 
 app.set("view engine", "ejs"); // вказуємо який шаблон використовувати
 app.set("views", "views"); // вказуємо папку в якій знаходяться шаблони
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false })); // використовуємо bodyParser для розбору даних з форми
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"))); // використовуємо express.static для сервісу статичних файлів
 app.use(express.static(path.join(__dirname, "scripts")));
 
 app.use("/admin", adminData.routes);

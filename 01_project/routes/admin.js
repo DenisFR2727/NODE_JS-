@@ -15,7 +15,7 @@ router.get("/add-product", (req, res, next) => {
     activeAddProduct: true,
     formsCSS: true,
     productCSS: true,
-  });
+  }); // вказуємо який шаблон використовувати і передаємо дані в шаблон
 });
 
 //  /admin/add-product => POST

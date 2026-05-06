@@ -6,7 +6,7 @@ const userData = [];
 router.get("/", (req, res, next) => {
   res.render("form", {
     pageTitle: "Forms",
-    path: "/forms",
+    path: "/",
     formsCSS: true,
     usersCSS: true,
   });

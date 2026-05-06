@@ -6,6 +6,7 @@ const path = require("path");
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const userRoutes = require("./routes/user");
+const error404Controller = require("./controllers/404");
 
 const app = express(); // створюємо екземпляр express
 
@@ -17,13 +18,12 @@ app.use(bodyParser.urlencoded({ extended: false })); // використовує
 app.use(express.static(path.join(__dirname, "public"))); // використовуємо express.static для сервісу статичних файлів
 app.use(express.static(path.join(__dirname, "scripts")));
 
-app.use("/admin", adminData.routes);
+app.use("/admin", adminData);
 app.use(shopRoutes);
 app.use(userRoutes);
 
-app.use((req, res, next) => {
-  res.status(404).render("404", { pageTitle: "NotFound" });
-});
+// підключили маршрут для обробки помилок
+app.use(error404Controller.get404);
 
 app.listen(3001);
 // sendFile(path.join(__dirname, "views", "not-found.html"));

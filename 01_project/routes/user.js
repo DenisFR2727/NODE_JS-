@@ -1,13 +1,7 @@
 const express = require("express");
-
+const userController = require("../controllers/user");
 const router = express.Router();
 
-router.get("/user", (req, res, next) => {
-  res.render("user", {
-    pageTitle: "User Page",
-    path: "/user",
-    activeUser: true,
-  });
-});
+router.get("/user", userController.getUsers);
 
 module.exports = router;

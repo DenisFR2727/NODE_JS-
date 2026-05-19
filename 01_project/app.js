@@ -5,13 +5,18 @@ const path = require("path");
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-const userRoutes = require("./routes/user");
+const usersRoutes = require("./routes/users");
+const cartRoutes = require("./routes/shop");
+const adminProductsRoutes = require("./routes/admin");
+const checkoutRoutes = require("./routes/shop");
+const productDetailsRoutes = require("./routes/shop");
+
 const error404Controller = require("./controllers/404");
 
 const app = express(); // створюємо екземпляр express
 
 app.set("view engine", "ejs"); // вказуємо який шаблон використовувати
-app.set("views", "views"); // вказуємо папку в якій знаходяться шаблони
+app.set(" views ", "views"); // вказуємо папку в якій знаходяться шаблони
 
 app.use(bodyParser.urlencoded({ extended: false })); // використовуємо bodyParser для розбору даних з форми
 
@@ -20,7 +25,26 @@ app.use(express.static(path.join(__dirname, "scripts")));
 
 app.use("/admin", adminData);
 app.use(shopRoutes);
-app.use(userRoutes);
+
+// usersRoutes for add-user
+app.use("/add-user", usersRoutes);
+app.use(usersRoutes);
+
+// cartRoutes for cart
+app.use("/cart", cartRoutes);
+app.use(cartRoutes);
+
+// adminProductsRoutes for admin/products
+app.use("/admin/products", adminProductsRoutes);
+app.use(adminProductsRoutes);
+
+// checkoutRoutes for checkout
+app.use("/checkout", checkoutRoutes);
+app.use(checkoutRoutes);
+
+// productDetailsRoutes for product-details
+app.use("/product-details/:productId", productDetailsRoutes);
+app.use(productDetailsRoutes);
 
 // підключили маршрут для обробки помилок
 app.use(error404Controller.get404);

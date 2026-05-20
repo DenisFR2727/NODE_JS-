@@ -42,8 +42,7 @@ app.use(adminProductsRoutes);
 app.use("/checkout", checkoutRoutes);
 app.use(checkoutRoutes);
 
-// productDetailsRoutes for product-details
-app.use("/product-details/:productId", productDetailsRoutes);
+app.use("/products/:productId", productDetailsRoutes);
 app.use(productDetailsRoutes);
 
 // підключили маршрут для обробки помилок

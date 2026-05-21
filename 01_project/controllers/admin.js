@@ -15,8 +15,12 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const product = new Product(null, title, imageUrl, description, price);
 
-  product.save();
-  res.redirect("/");
+  product
+    .save()
+    .then(() => {
+      res.redirect("/");
+    })
+    .catch((err) => console.log(err));
 };
 
 // Route to Edit Product
@@ -26,17 +30,19 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect("/");
   }
   const prodId = req.params.productId;
-  Product.findById(prodId, (product) => {
-    if (!product) {
-      return res.redirect("/");
-    }
-    res.render("admin/edit-product", {
-      pageTitle: "Edit Product",
-      path: "/admin/edit-product",
-      editing: editMode,
-      product: product,
-    });
-  });
+  Product.findById(prodId)
+    .then(([rows, fieldData]) => {
+      if (!rows.length) {
+        return res.redirect("/");
+      }
+      res.render("admin/edit-product", {
+        pageTitle: "Edit Product",
+        path: "/admin/edit-product",
+        editing: editMode,
+        product: rows[0],
+      });
+    })
+    .catch((err) => console.log(err));
 };
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -64,14 +70,16 @@ exports.deleteProductById = (req, res, next) => {
 
 // Route to Admin Products
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll((products) => {
-    res.render("admin/products", {
-      products: products,
-      pageTitle: "Admin Products",
-      path: "/admin/products",
-      activeAdminProducts: true,
-      formsCSS: true,
-      productCSS: true,
-    });
-  });
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      res.render("admin/products", {
+        products: rows,
+        pageTitle: "Admin Products",
+        path: "/admin/products",
+        activeAdminProducts: true,
+        formsCSS: true,
+        productCSS: true,
+      });
+    })
+    .catch((err) => console.log(err));
 };

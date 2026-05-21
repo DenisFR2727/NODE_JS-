@@ -2,35 +2,38 @@ const Cart = require("../models/cart");
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll((products) => {
-    res.render("shop/product-list", {
-      products: products,
-      pageTitle: "Shop",
-      path: "/products",
-      hasProducts: products.length > 0,
-      activeShop: true,
-      productCSS: true,
-    });
-  });
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      res.render("shop/product-list", {
+        products: rows,
+        pageTitle: "Shop",
+        path: "/products",
+        hasProducts: rows.length > 0,
+        activeShop: true,
+        productCSS: true,
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
 
-  Product.findById(prodId, (product) => {
-    console.log(product);
-    if (!product) {
-      return res.redirect("/");
-    }
-    res.render("shop/product-details", {
-      product: product,
-      pageTitle: product.title,
-      path: "/products",
-      activeProductDetails: true,
-      formsCSS: true,
-      productCSS: true,
-    });
-  });
+  Product.findById(prodId)
+    .then(([product]) => {
+      if (!product) {
+        return res.redirect("/");
+      }
+      res.render("shop/product-details", {
+        product: product[0],
+        pageTitle: product.title,
+        path: "/products",
+        activeProductDetails: true,
+        formsCSS: true,
+        productCSS: true,
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 // Route to Checkout
@@ -45,15 +48,15 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll((products) => {
-    res.render("shop/index", {
-      pageTitle: "Shop",
-      path: "/",
-      activeCheckout: true,
-      formsCSS: true,
-      productCSS: true,
-    });
-  });
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      res.render("shop/index", {
+        //   products: rows,
+        pageTitle: "Shop",
+        path: "/",
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 // Route to Cart

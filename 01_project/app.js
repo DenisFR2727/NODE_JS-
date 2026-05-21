@@ -13,6 +13,7 @@ const productDetailsRoutes = require("./routes/shop");
 
 const error404Controller = require("./controllers/404");
 
+const db = require("./util/database");
 const app = express(); // створюємо екземпляр express
 
 app.set("view engine", "ejs"); // вказуємо який шаблон використовувати

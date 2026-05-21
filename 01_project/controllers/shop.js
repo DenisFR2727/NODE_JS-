@@ -97,7 +97,7 @@ exports.postCart = (req, res, next) => {
     res.redirect("/cart");
   });
 };
-
+// Controller to delete item from cart
 exports.postCartDeleteItem = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId, (product) => {

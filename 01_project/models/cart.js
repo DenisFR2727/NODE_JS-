@@ -1,71 +1,99 @@
-const fs = require("fs");
-const path = require("path");
+const db = require("../util/database");
 
-const p = path.join(
-  // Шлях до кореневої папки проєкту (де запускається головний файл).
-  path.dirname(require.main.filename),
-  "data",
-  "cart.json",
-);
+const CART_ID = 1;
 
 module.exports = class Cart {
   static addProduct(id, productPrice) {
-    fs.readFile(p, (err, fileContent) => {
-      let cart = { products: [], totalPrice: 0 };
-      if (!err) {
-        cart = JSON.parse(fileContent);
-      }
-      const existingProductIndex = cart.products.findIndex(
-        (product) => product.id === id,
-      );
-      const existingProduct = cart.products[existingProductIndex];
-      let updatedProduct;
-      if (existingProduct) {
-        updatedProduct = { ...existingProduct };
-        updatedProduct.qty = updatedProduct.qty + 1;
-        cart.products = [...cart.products];
-        cart.products[existingProductIndex] = updatedProduct;
-      } else {
-        updatedProduct = { id: id, qty: 1 };
-        cart.products = [...cart.products, updatedProduct];
-      }
-      cart.totalPrice = +cart.totalPrice + +productPrice;
-      fs.writeFile(p, JSON.stringify(cart), (err) => {
-        console.log(err);
+    return db
+      .execute("SELECT * FROM carts WHERE id = ?", [CART_ID])
+      .then(([rows]) => {
+        let cart = { products: [], totalPrice: 0 };
+
+        if (rows.length > 0) {
+          cart = {
+            products: JSON.parse(rows[0].products),
+            totalPrice: rows[0].totalPrice,
+          };
+        }
+
+        const existingProductIndex = cart.products.findIndex(
+          (product) => product.id == id,
+        );
+        const existingProduct = cart.products[existingProductIndex];
+        let updatedProduct;
+
+        if (existingProduct) {
+          updatedProduct = { ...existingProduct };
+          updatedProduct.qty = updatedProduct.qty + 1;
+          cart.products = [...cart.products];
+          cart.products[existingProductIndex] = updatedProduct;
+        } else {
+          updatedProduct = { id: id, qty: 1 };
+          cart.products = [...cart.products, updatedProduct];
+        }
+
+        cart.totalPrice = +cart.totalPrice + +productPrice;
+
+        if (rows.length > 0) {
+          return db.execute(
+            "UPDATE carts SET products = ?, totalPrice = ? WHERE id = ?",
+            [JSON.stringify(cart.products), cart.totalPrice, CART_ID],
+          );
+        }
+
+        return db.execute(
+          "INSERT INTO carts (id, products, totalPrice) VALUES (?, ?, ?)",
+          [CART_ID, JSON.stringify(cart.products), cart.totalPrice],
+        );
       });
-    });
   }
+
   static deleteProduct(id, productPrice) {
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        return;
-      }
-      const updateCart = { ...JSON.parse(fileContent) };
-      const product = updateCart.products.findIndex((prod) => prod.id === id);
-      const productQty = product.qty;
+    return db
+      .execute("SELECT * FROM carts WHERE id = ?", [CART_ID])
+      .then(([rows]) => {
+        if (rows.length === 0) {
+          return;
+        }
 
-      if (!product) {
-        return;
-      }
+        const cart = {
+          products: JSON.parse(rows[0].products),
+          totalPrice: rows[0].totalPrice,
+        };
 
-      updateCart.products = updateCart.products.filter(
-        (prod) => prod.id !== id,
-      );
-      updateCart.totalPrice =
-        +updateCart.totalPrice - +productPrice * +productQty;
+        const productIndex = cart.products.findIndex((prod) => prod.id == id);
+        if (productIndex === -1) {
+          return;
+        }
 
-      fs.writeFile(p, JSON.stringify(updateCart), (err) => {
-        console.log(err);
+        const productQty = cart.products[productIndex].qty;
+
+        cart.products = cart.products.filter((prod) => prod.id != id);
+        cart.totalPrice = +cart.totalPrice - +productPrice * +productQty;
+
+        return db.execute(
+          "UPDATE carts SET products = ?, totalPrice = ? WHERE id = ?",
+          [JSON.stringify(cart.products), cart.totalPrice, CART_ID],
+        );
       });
-    });
   }
+
   static getCartProducts(cb) {
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
+    return db
+      .execute("SELECT * FROM carts WHERE id = ?", [CART_ID])
+      .then(([rows]) => {
+        if (rows.length === 0) {
+          cb(null);
+        } else {
+          cb({
+            products: JSON.parse(rows[0].products),
+            totalPrice: rows[0].totalPrice,
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
         cb(null);
-      } else {
-        cb(JSON.parse(fileContent));
-      }
-    });
+      });
   }
 };

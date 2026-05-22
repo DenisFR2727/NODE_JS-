@@ -22,7 +22,9 @@ module.exports = class Product {
       [this.title, this.price, this.imageUrl, this.description],
     );
   }
-  static deleteById() {}
+  static deleteById(id) {
+    return db.execute("DELETE FROM products WHERE id = ?", [id]);
+  }
 
   static async fetchAll() {
     return db.execute("SELECT * FROM products");

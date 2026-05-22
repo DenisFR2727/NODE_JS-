@@ -8,42 +8,42 @@ exports.getAddProduct = (req, res, next) => {
   }); // вказуємо який шаблон використовувати і передаємо дані в шаблон
 };
 
-exports.postAddProduct = (req, res, next) => {
-  const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
-  const description = req.body.description;
-  const price = req.body.price;
-  const product = new Product(null, title, imageUrl, description, price);
-
-  product
-    .save()
-    .then(() => {
-      res.redirect("/");
-    })
-    .catch((err) => console.log(err));
-};
-
-// Route to Edit Product
 exports.getEditProduct = (req, res, next) => {
-  const editMode = req.query.edit;
-  if (!editMode) {
-    return res.redirect("/");
-  }
   const prodId = req.params.productId;
-  Product.findById(prodId)
-    .then(([rows, fieldData]) => {
-      if (!rows.length) {
+  Product.findByPk(prodId)
+    .then((product) => {
+      if (!product) {
         return res.redirect("/");
       }
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
-        editing: editMode,
-        product: rows[0],
+        editing: true,
+        product,
       });
     })
     .catch((err) => console.log(err));
 };
+
+exports.postAddProduct = (req, res, next) => {
+  const title = req.body.title;
+  const imageUrl = req.body.imageUrl;
+  const description = req.body.description;
+  const price = req.body.price;
+
+  Product.create({
+    title,
+    imageUrl,
+    description,
+    price: parseFloat(price),
+  })
+    .then((result) => {
+      console.log(result);
+      res.redirect("/");
+    })
+    .catch((err) => console.log(err));
+};
+
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;

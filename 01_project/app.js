@@ -13,7 +13,8 @@ const productDetailsRoutes = require("./routes/shop");
 
 const error404Controller = require("./controllers/404");
 
-const initDatabase = require("./util/init-db");
+const sequelize = require("./util/database");
+
 const app = express(); // створюємо екземпляр express
 
 app.set("view engine", "ejs"); // вказуємо який шаблон використовувати
@@ -49,12 +50,17 @@ app.use(productDetailsRoutes);
 // підключили маршрут для обробки помилок
 app.use(error404Controller.get404);
 
-initDatabase()
-  .then(() => app.listen(3001))
-  .catch((err) => {
-    console.error("Database init failed:", err.message);
-    process.exit(1);
-  });
+// sync - синхронізує моделі з базою даних
+sequelize
+  .sync()
+  .then((result) => {
+    //  console.log(result);
+    app.listen(3001);
+  })
+  .catch((err) => console.log(err));
+
+// app.listen(3001);
+
 // sendFile(path.join(__dirname, "views", "not-found.html"));
 // { extended: false } - що б він міг розбирати функції які не використовуються за замовчуванням
 // __dirname → абсолютний шлях до папки файлу

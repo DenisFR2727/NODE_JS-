@@ -1,93 +1,100 @@
-const db = require("../util/database");
+const Sequelize = require("sequelize");
+
+const sequelize = require("../util/database");
 
 const CART_ID = 1;
 
+const CartModel = sequelize.define("cart", {
+  id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    primaryKey: true,
+  },
+  products: {
+    type: Sequelize.JSON,
+    allowNull: false,
+    defaultValue: [],
+  },
+  totalPrice: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+    defaultValue: 0,
+  },
+});
+
 module.exports = class Cart {
   static addProduct(id, productPrice) {
-    return db
-      .execute("SELECT * FROM carts WHERE id = ?", [CART_ID])
-      .then(([rows]) => {
-        let cart = { products: [], totalPrice: 0 };
+    return CartModel.findByPk(CART_ID).then((cart) => {
+      let products = [];
+      let totalPrice = 0;
 
-        if (rows.length > 0) {
-          cart = {
-            products: JSON.parse(rows[0].products),
-            totalPrice: rows[0].totalPrice,
-          };
-        }
+      if (cart) {
+        products = cart.products;
+        totalPrice = cart.totalPrice;
+      }
 
-        const existingProductIndex = cart.products.findIndex(
-          (product) => product.id == id,
-        );
-        const existingProduct = cart.products[existingProductIndex];
-        let updatedProduct;
+      const existingProductIndex = products.findIndex(
+        (product) => product.id == id,
+      );
+      const existingProduct = products[existingProductIndex];
+      let updatedProduct;
 
-        if (existingProduct) {
-          updatedProduct = { ...existingProduct };
-          updatedProduct.qty = updatedProduct.qty + 1;
-          cart.products = [...cart.products];
-          cart.products[existingProductIndex] = updatedProduct;
-        } else {
-          updatedProduct = { id: id, qty: 1 };
-          cart.products = [...cart.products, updatedProduct];
-        }
+      if (existingProduct) {
+        updatedProduct = { ...existingProduct, qty: existingProduct.qty + 1 };
+        products = [...products];
+        products[existingProductIndex] = updatedProduct;
+      } else {
+        updatedProduct = { id, qty: 1 };
+        products = [...products, updatedProduct];
+      }
 
-        cart.totalPrice = +cart.totalPrice + +productPrice;
+      totalPrice = +totalPrice + +productPrice;
 
-        if (rows.length > 0) {
-          return db.execute(
-            "UPDATE carts SET products = ?, totalPrice = ? WHERE id = ?",
-            [JSON.stringify(cart.products), cart.totalPrice, CART_ID],
-          );
-        }
+      if (cart) {
+        cart.products = products;
+        cart.totalPrice = totalPrice;
+        return cart.save();
+      }
 
-        return db.execute(
-          "INSERT INTO carts (id, products, totalPrice) VALUES (?, ?, ?)",
-          [CART_ID, JSON.stringify(cart.products), cart.totalPrice],
-        );
+      return CartModel.create({
+        id: CART_ID,
+        products,
+        totalPrice,
       });
+    });
   }
 
-  static deleteProduct(id, productPrice) {
-    return db
-      .execute("SELECT * FROM carts WHERE id = ?", [CART_ID])
-      .then(([rows]) => {
-        if (rows.length === 0) {
-          return;
-        }
+  //   static deleteProduct(id, productPrice) {
+  //     return CartModel.findByPk(CART_ID).then((cart) => {
+  //       if (!cart) {
+  //         return;
+  //       }
 
-        const cart = {
-          products: JSON.parse(rows[0].products),
-          totalPrice: rows[0].totalPrice,
-        };
+  //       const products = cart.products;
+  //       const productIndex = products.findIndex((prod) => prod.id == id);
+  //       if (productIndex === -1) {
+  //         return;
+  //       }
 
-        const productIndex = cart.products.findIndex((prod) => prod.id == id);
-        if (productIndex === -1) {
-          return;
-        }
+  //       const productQty = products[productIndex].qty;
+  //       const updatedProducts = products.filter((prod) => prod.id != id);
+  //       const totalPrice = +cart.totalPrice - +productPrice * +productQty;
 
-        const productQty = cart.products[productIndex].qty;
-
-        cart.products = cart.products.filter((prod) => prod.id != id);
-        cart.totalPrice = +cart.totalPrice - +productPrice * +productQty;
-
-        return db.execute(
-          "UPDATE carts SET products = ?, totalPrice = ? WHERE id = ?",
-          [JSON.stringify(cart.products), cart.totalPrice, CART_ID],
-        );
-      });
-  }
+  //       cart.products = updatedProducts;
+  //       cart.totalPrice = totalPrice;
+  //       return cart.save();
+  //     });
+  //   }
 
   static getCartProducts(cb) {
-    return db
-      .execute("SELECT * FROM carts WHERE id = ?", [CART_ID])
-      .then(([rows]) => {
-        if (rows.length === 0) {
+    return CartModel.findByPk(CART_ID)
+      .then((cart) => {
+        if (!cart) {
           cb(null);
         } else {
           cb({
-            products: JSON.parse(rows[0].products),
-            totalPrice: rows[0].totalPrice,
+            products: cart.products,
+            totalPrice: cart.totalPrice,
           });
         }
       })

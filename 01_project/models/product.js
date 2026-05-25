@@ -4,6 +4,7 @@ const Sequelize = require("sequelize");
 
 const sequelize = require("../util/database");
 
+// define() - метод для визначення моделі в Sequelize.
 const Product = sequelize.define("product", {
   id: {
     type: Sequelize.INTEGER,

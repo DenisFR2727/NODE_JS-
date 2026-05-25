@@ -14,6 +14,7 @@ const productDetailsRoutes = require("./routes/shop");
 const error404Controller = require("./controllers/404");
 
 const sequelize = require("./util/database");
+require("./models/cart");
 
 const app = express(); // створюємо екземпляр express
 

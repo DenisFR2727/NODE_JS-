@@ -39,7 +39,7 @@ exports.postAddProduct = (req, res, next) => {
   })
     .then((result) => {
       console.log(result);
-      res.redirect("/");
+      res.redirect("/products");
     })
     .catch((err) => console.log(err));
 };
@@ -50,32 +50,42 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDescription = req.body.description;
   const updatedPrice = req.body.price;
-  const updatedProduct = new Product(
-    prodId,
-    updatedTitle,
-    updatedImageUrl,
-    updatedDescription,
-    updatedPrice,
-  );
-  updatedProduct.save();
-  res.redirect("/admin/products");
+  Product.findByPk(prodId)
+    .then((product) => {
+      if (!product) {
+        return res.redirect("/");
+      }
+      product.title = updatedTitle;
+      product.imageUrl = updatedImageUrl;
+      product.description = updatedDescription;
+      product.price = updatedPrice;
+      return product.save(); // зберігаємо зміни в базу даних
+    })
+    .then(() => {
+      res.redirect("/admin/products");
+    })
+    .catch((err) => console.log(err));
 };
 // Delete Product
 exports.deleteProductById = (req, res, next) => {
   const prodId = req.params.productId;
-  Product.deleteById(prodId)
-    .then(() => {
-      return res.redirect("/admin/products");
+  Product.findByPk(prodId)
+    .then((product) => {
+      if (!product) {
+        return res.redirect("/");
+      }
+      return product.destroy();
     })
+    .then(() => res.redirect("/admin/products"))
     .catch((err) => console.log(err));
 };
 
 // Route to Admin Products
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("admin/products", {
-        products: rows,
+        products: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
         activeAdminProducts: true,

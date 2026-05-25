@@ -2,35 +2,30 @@ const Cart = require("../models/cart");
 const Product = require("../models/product");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/product-list", {
-        products: rows,
+        products: products,
         pageTitle: "Shop",
         path: "/products",
-        hasProducts: rows.length > 0,
-        activeShop: true,
-        productCSS: true,
       });
     })
     .catch((err) => console.log(err));
 };
 
+//  Запит до бази даних для отримання продукту за id
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
 
-  Product.findById(prodId)
-    .then(([product]) => {
-      if (!product) {
+  Product.findByPk(prodId)
+    .then((products) => {
+      if (products === null) {
         return res.redirect("/");
       }
       res.render("shop/product-details", {
-        product: product[0],
-        pageTitle: product.title,
+        product: products,
+        pageTitle: products.title,
         path: "/products",
-        activeProductDetails: true,
-        formsCSS: true,
-        productCSS: true,
       });
     })
     .catch((err) => console.log(err));
@@ -48,10 +43,10 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/index", {
-        //   products: rows,
+        products: products,
         pageTitle: "Shop",
         path: "/",
       });
@@ -72,10 +67,10 @@ exports.getCart = (req, res, next) => {
         cartProducts: [],
       });
     }
-    Product.fetchAll()
-      .then(([rows]) => {
+    Product.findAll()
+      .then((products) => {
         const cartProducts = [];
-        for (let product of rows) {
+        for (let product of products) {
           const cartProductData = cart.products.find(
             (p) => p.id == product.id, // == бо в JSON id може бути рядком
           );
@@ -90,6 +85,7 @@ exports.getCart = (req, res, next) => {
           }
         }
         res.render("shop/cart", {
+          products: products,
           pageTitle: "Your Cart",
           path: "/cart",
           activeCart: true,
@@ -106,16 +102,14 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   //   console.log(prodId);
 
-  Product.findById(prodId)
-    .then(([rows]) => {
-      if (!rows || rows.length === 0) {
-        return res.redirect("/");
-      }
-      return Cart.addProduct(prodId, rows[0].price).then(() =>
-        res.redirect("/cart"),
-      );
-    })
-    .catch((err) => console.log(err));
+  Product.findByPk(prodId).then((product) => {
+    if (!product) {
+      return res.redirect("/");
+    }
+    return Cart.addProduct(prodId, product.price).then(() =>
+      res.redirect("/cart"),
+    );
+  });
 };
 // Controller to delete item from cart
 exports.postCartDeleteItem = (req, res, next) => {

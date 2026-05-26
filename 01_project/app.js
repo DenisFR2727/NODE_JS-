@@ -14,12 +14,14 @@ const productDetailsRoutes = require("./routes/shop");
 const error404Controller = require("./controllers/404");
 
 const sequelize = require("./util/database");
+require("./models/product");
 require("./models/cart");
+require("./models/users");
 
 const app = express(); // створюємо екземпляр express
 
 app.set("view engine", "ejs"); // вказуємо який шаблон використовувати
-app.set(" views ", "views"); // вказуємо папку в якій знаходяться шаблони
+app.set("views", "views");
 
 app.use(bodyParser.urlencoded({ extended: false })); // використовуємо bodyParser для розбору даних з форми
 
@@ -29,8 +31,6 @@ app.use(express.static(path.join(__dirname, "scripts")));
 app.use("/admin", adminData);
 app.use(shopRoutes);
 
-// usersRoutes for add-user
-app.use("/add-user", usersRoutes);
 app.use(usersRoutes);
 
 // cartRoutes for cart
@@ -51,7 +51,6 @@ app.use(productDetailsRoutes);
 // підключили маршрут для обробки помилок
 app.use(error404Controller.get404);
 
-// sync - синхронізує моделі з базою даних
 sequelize
   .sync()
   .then((result) => {

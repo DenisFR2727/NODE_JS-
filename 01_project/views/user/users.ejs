@@ -5,7 +5,7 @@
     <main>
       <h1>Users Page</h1>
       <ul>
-         <% if (hasUsers) { %>
+         <% if (users.length > 0) { %>
             <% users.forEach((user) => { %>
                <li>
                   <p>
@@ -14,6 +14,10 @@
                   <p>
                      <a href="/users/<%= user.id %>">Details</a>
                   </p>
+                  <form action="/delete-user" method="POST">
+                     <input type="hidden" name="userId" value="<%= user.id %>">
+                     <button type="submit">Delete</button>
+                  </form>
             </li>
             <% }); %>
             <% } else { %>

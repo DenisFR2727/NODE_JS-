@@ -64,28 +64,6 @@ module.exports = class Cart {
     });
   }
 
-  //   static deleteProduct(id, productPrice) {
-  //     return CartModel.findByPk(CART_ID).then((cart) => {
-  //       if (!cart) {
-  //         return;
-  //       }
-
-  //       const products = cart.products;
-  //       const productIndex = products.findIndex((prod) => prod.id == id);
-  //       if (productIndex === -1) {
-  //         return;
-  //       }
-
-  //       const productQty = products[productIndex].qty;
-  //       const updatedProducts = products.filter((prod) => prod.id != id);
-  //       const totalPrice = +cart.totalPrice - +productPrice * +productQty;
-
-  //       cart.products = updatedProducts;
-  //       cart.totalPrice = totalPrice;
-  //       return cart.save();
-  //     });
-  //   }
-
   static getCartProducts(cb) {
     return CartModel.findByPk(CART_ID)
       .then((cart) => {

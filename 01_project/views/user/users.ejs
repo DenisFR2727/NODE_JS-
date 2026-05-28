@@ -12,6 +12,9 @@
                   <%= user.name %>
                   </p>
                   <p>
+                  <%= user.email %>
+                  </p>
+                  <p>
                      <a href="/users/<%= user.id %>">Details</a>
                   </p>
                   <form action="/delete-user" method="POST">

@@ -14,9 +14,11 @@ const productDetailsRoutes = require("./routes/shop");
 const error404Controller = require("./controllers/404");
 
 const sequelize = require("./util/database");
-require("./models/product");
-require("./models/cart");
-require("./models/users");
+
+const Product = require("./models/product");
+const Cart = require("./models/cart");
+const User = require("./models/users");
+const CartItem = require("./models/cart-item");
 
 const app = express(); // створюємо екземпляр express
 
@@ -27,6 +29,16 @@ app.use(bodyParser.urlencoded({ extended: false })); // використовує
 
 app.use(express.static(path.join(__dirname, "public"))); // використовуємо express.static для сервісу статичних файлів
 app.use(express.static(path.join(__dirname, "scripts")));
+
+// middleware для авторизації користувача
+app.use((req, res, next) => {
+  User.findByPk(1)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminData);
 app.use(shopRoutes);
@@ -51,10 +63,34 @@ app.use(productDetailsRoutes);
 // підключили маршрут для обробки помилок
 app.use(error404Controller.get404);
 
+// Product model
+Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+User.hasMany(Product);
+
+// Cart model
+// Cart.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+User.hasOne(Cart); // User має один Cart
+Cart.hasMany(CartItem); // Cart має багато CartItem
+Cart.belongsTo(User); // Cart належить до User
+Cart.belongsToMany(Product, { through: CartItem }); // Cart має багато Product через CartItem
+Product.belongsToMany(Cart, { through: CartItem }); // Product має багато Cart через CartItem
+
+// .sync({ force: true }) => видаляє всі дані з бази даних та створює нові таблиці
 sequelize
   .sync()
   .then((result) => {
-    //  console.log(result);
+    return User.findByPk(1);
+  })
+  .then((user) => {
+    if (!user) {
+      return User.create({ name: "Max", email: "test@test.com" });
+    }
+    return user;
+  })
+  .then((user) => {
+    user.createCart();
+  })
+  .then((cart) => {
     app.listen(3001);
   })
   .catch((err) => console.log(err));

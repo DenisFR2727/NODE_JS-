@@ -30,12 +30,13 @@ exports.getUser = (req, res, next) => {
 
 exports.postAddUser = (req, res, next) => {
   const name = req.body.name?.trim();
+  const email = req.body.email?.trim();
 
-  if (!name) {
+  if (!name || !email) {
     return res.redirect("/add-user");
   }
 
-  User.create({ name })
+  User.create({ name, email })
     .then((user) => {
       // console.log(user);
 

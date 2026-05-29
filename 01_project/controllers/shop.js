@@ -1,5 +1,6 @@
 const Cart = require("../models/cart");
 const Product = require("../models/product");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -127,15 +128,47 @@ exports.postCartDeleteItem = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
+exports.postPrder = (req, res, next) => {
+  let fetchedCart;
+
+  req.user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart.getProducts();
+    })
+    .then((products) => {
+      return req.user.createOrder().then((order) => {
+        return order.addProducts(
+          products.map((product) => {
+            product.orderItem = { quantity: product.cartItem.quantity };
+            return product;
+          }),
+        );
+      });
+    })
+    .then(() => fetchedCart.setProducts([]))
+    .then(() => {
+      res.redirect("/orders");
+    })
+    .catch((err) => console.log(err));
+};
+
 // Route to Orders
 exports.getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    pageTitle: "Your Orders",
-    path: "/orders",
-    activeOrders: true,
-    formsCSS: true,
-    productCSS: true,
-  });
+  req.user
+    .getOrders({ include: [Product] })
+    .then((orders) => {
+      res.render("shop/orders", {
+        orders: orders,
+        pageTitle: "Your Orders",
+        path: "/orders",
+        activeOrders: true,
+        formsCSS: true,
+        productCSS: true,
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 // for (let product of products) {

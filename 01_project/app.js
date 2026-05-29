@@ -20,6 +20,9 @@ const Cart = require("./models/cart");
 const User = require("./models/users");
 const CartItem = require("./models/cart-item");
 
+const Order = require("./models/order");
+const OrderItem = require("./models/order-item");
+
 const app = express(); // створюємо екземпляр express
 
 app.set("view engine", "ejs"); // вказуємо який шаблон використовувати
@@ -74,6 +77,12 @@ Cart.hasMany(CartItem); // Cart має багато CartItem
 Cart.belongsTo(User); // Cart належить до User
 Cart.belongsToMany(Product, { through: CartItem }); // Cart має багато Product через CartItem
 Product.belongsToMany(Cart, { through: CartItem }); // Product має багато Cart через CartItem
+
+// Order model
+Order.belongsTo(User); // Order належить до User
+User.hasMany(Order); // User має багато Order
+Order.belongsToMany(Product, { through: OrderItem }); // Order має багато Product через OrderItem
+Product.belongsToMany(Order, { through: OrderItem }); // Product має багато Order через OrderItem
 
 // .sync({ force: true }) => видаляє всі дані з бази даних та створює нові таблиці
 sequelize

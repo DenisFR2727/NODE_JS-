@@ -11,10 +11,8 @@ exports.getAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
   const prodId = req.params.productId;
   //   Product.findByPk(prodId)
-  req.user
-    .getProducts({ where: { id: prodId } }) // getProducts() - метод для отримання продуктів користувача
-    .then((products) => {
-      const product = products[0]; // products - це масив продуктів, тому беремо перший продукт
+  Product.findById(prodId)
+    .then((product) => {
       if (!product) {
         return res.redirect("/");
       }
@@ -26,6 +24,21 @@ exports.getEditProduct = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
+  //   req.user
+  //     .getProducts({ where: { id: prodId } }) // getProducts() - метод для отримання продуктів користувача
+  //     .then((products) => {
+  //       const product = products[0]; // products - це масив продуктів, тому беремо перший продукт
+  //       if (!product) {
+  //         return res.redirect("/");
+  //       }
+  //       res.render("admin/edit-product", {
+  //         pageTitle: "Edit Product",
+  //         path: "/admin/edit-product",
+  //         editing: true,
+  //         product,
+  //       });
+  //     })
+  //     .catch((err) => console.log(err));
 };
 
 exports.postAddProduct = (req, res, next) => {
@@ -33,18 +46,11 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  //   const userId = req.user.id;
 
-  // createProduct() - метод для створення продукту в моделі Product
-  req.user
-    .createProduct({
-      title,
-      imageUrl,
-      description,
-      price: parseFloat(price),
-    })
-    .then((result) => {
-      console.log(result);
+  const product = new Product(title, price, imageUrl, description);
+  product
+    .save()
+    .then(() => {
       res.redirect("/admin/products");
     })
     .catch((err) => console.log(err));
@@ -56,17 +62,13 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDescription = req.body.description;
   const updatedPrice = req.body.price;
-  Product.findByPk(prodId)
-    .then((product) => {
-      if (!product) {
-        return res.redirect("/");
-      }
-      product.title = updatedTitle;
-      product.imageUrl = updatedImageUrl;
-      product.description = updatedDescription;
-      product.price = updatedPrice;
-      return product.save(); // зберігаємо зміни в базу даних
-    })
+  Product.updateById(
+    prodId,
+    updatedTitle,
+    updatedImageUrl,
+    updatedDescription,
+    updatedPrice,
+  )
     .then(() => {
       res.redirect("/admin/products");
     })
@@ -75,25 +77,24 @@ exports.postEditProduct = (req, res, next) => {
 // Delete Product
 exports.deleteProductById = (req, res, next) => {
   const prodId = req.params.productId;
-  Product.findByPk(prodId)
+  Product.findById(prodId)
     .then((product) => {
       if (!product) {
         return res.redirect("/");
       }
-      return product.destroy();
+      return Product.deleteById(prodId).then(() => {
+        res.redirect("/admin/products");
+      });
     })
-    .then(() => res.redirect("/admin/products"))
     .catch((err) => console.log(err));
 };
 
 // Route to Admin Products
 exports.getProducts = (req, res, next) => {
-  //   Product.findAll()
-  req.user
-    .getProducts()
+  Product.fetchAll()
     .then((products) => {
       res.render("admin/products", {
-        products: products,
+        products,
         pageTitle: "Admin Products",
         path: "/admin/products",
         activeAdminProducts: true,
@@ -103,3 +104,13 @@ exports.getProducts = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+
+// Sequelize version
+// createProduct() - метод для створення продукту в моделі Product
+//   req.user
+//     .createProduct({
+//       title,
+//       imageUrl,
+//       description,
+//       price: parseFloat(price),
+//     })

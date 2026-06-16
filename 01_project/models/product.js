@@ -1,33 +1,133 @@
-// -------------Sequelize------------------------------------------------------
+const mongoConnect = require("../util/database");
+const mongodb = require("mongodb");
+const getDb = require("../util/database").getDb;
 
-const Sequelize = require("sequelize");
+class Product {
+  constructor(title, price, imageUrl, description) {
+    this.title = title;
+    this.price = price;
+    this.imageUrl = imageUrl;
+    this.description = description;
+  }
 
-const sequelize = require("../util/database");
+  save() {
+    const db = getDb();
 
-// define() - метод для визначення моделі в Sequelize.
-const Product = sequelize.define("product", {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  },
-  title: Sequelize.STRING,
-  price: {
-    type: Sequelize.DOUBLE,
-    allowNull: false,
-  },
-  imageUrl: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  description: {
-    type: Sequelize.TEXT,
-    allowNull: false,
-  },
-});
+    return db
+      .collection("products")
+      .insertOne(this)
+      .then((result) => {
+        console.log(result);
+
+        //   return result;
+      })
+      .catch((err) => {
+        console.log(err);
+        throw err;
+      }); // insertOne() - метод для вставки одного документа в колекцію
+  }
+  static fetchAll() {
+    const db = getDb();
+    return db
+      .collection("products")
+      .find()
+      .toArray()
+      .then((products) => {
+        console.log(products);
+        return products;
+      })
+      .catch((err) => {
+        console.log(err);
+        throw err;
+      });
+  }
+  static findById(prodId) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .find({ _id: new mongodb.ObjectId(prodId) })
+      .next()
+      .then((product) => {
+        console.log(product);
+        return product;
+      })
+      .catch((err) => {
+        console.log(err);
+        throw err;
+      });
+  }
+  static deleteById(prodId) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .deleteOne({ _id: new mongodb.ObjectId(prodId) })
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log(err);
+        throw err;
+      });
+  }
+  static updateById(
+    prodId,
+    updatedTitle,
+    updatedImageUrl,
+    updatedDescription,
+    updatedPrice,
+  ) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .updateOne(
+        { _id: new mongodb.ObjectId(prodId) },
+        {
+          $set: {
+            title: updatedTitle,
+            imageUrl: updatedImageUrl,
+            description: updatedDescription,
+            price: updatedPrice,
+          },
+        },
+      )
+      .then((result) => {
+        console.log(result);
+      });
+  }
+}
 
 module.exports = Product;
+
+// -------------Sequelize------------------------------------------------------
+
+// const Sequelize = require("sequelize");
+
+// const sequelize = require("../util/database");
+
+// // define() - метод для визначення моделі в Sequelize.
+// const Product = sequelize.define("product", {
+//   id: {
+//     type: Sequelize.INTEGER,
+//     autoIncrement: true,
+//     allowNull: false,
+//     primaryKey: true,
+//   },
+//   title: Sequelize.STRING,
+//   price: {
+//     type: Sequelize.DOUBLE,
+//     allowNull: false,
+//   },
+//   imageUrl: {
+//     type: Sequelize.STRING,
+//     allowNull: false,
+//   },
+//   description: {
+//     type: Sequelize.TEXT,
+//     allowNull: false,
+//   },
+// });
+
+// module.exports = Product;
 
 // ---------SQL------------------------------------------------------
 

@@ -3,7 +3,7 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  Product.fetchAll()
     .then((products) => {
       res.render("shop/product-list", {
         products: products,
@@ -17,16 +17,15 @@ exports.getProducts = (req, res, next) => {
 //  Запит до бази даних для отримання продукту за id
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
-
-  Product.findByPk(prodId)
-    .then((products) => {
-      if (products === null) {
+  Product.findById(prodId)
+    .then((product) => {
+      if (!product) {
         return res.redirect("/");
       }
       res.render("shop/product-details", {
-        product: products,
-        pageTitle: products.title,
-        path: "/products",
+        product: product,
+        pageTitle: product._id,
+        path: "/products/" + product._id,
       });
     })
     .catch((err) => console.log(err));
@@ -44,7 +43,7 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.findAll()
+  Product.fetchAll()
     .then((products) => {
       res.render("shop/index", {
         products: products,

@@ -1,31 +1,47 @@
-const mongoConnect = require("../util/database");
 const mongodb = require("mongodb");
 const getDb = require("../util/database").getDb;
 
 class Product {
-  constructor(title, price, imageUrl, description) {
+  constructor(id, title, price, imageUrl, description, userId) {
+    this._id = id || null;
     this.title = title;
     this.price = price;
     this.imageUrl = imageUrl;
     this.description = description;
+    this.userId = userId;
   }
 
   save() {
     const db = getDb();
+    let dbOp;
 
-    return db
-      .collection("products")
-      .insertOne(this)
+    if (this._id) {
+      dbOp = db.collection("products").updateOne(
+        { _id: new mongodb.ObjectId(this._id) },
+        {
+          $set: this,
+        },
+      );
+    } else {
+      dbOp = db.collection("products").insertOne({
+        title: this.title,
+        price: this.price,
+        imageUrl: this.imageUrl,
+        description: this.description,
+        userId: new mongodb.ObjectId(this.userId),
+      });
+    }
+
+    return dbOp
       .then((result) => {
         console.log(result);
-
-        //   return result;
       })
       .catch((err) => {
         console.log(err);
         throw err;
-      }); // insertOne() - метод для вставки одного документа в колекцію
+      });
   }
+
   static fetchAll() {
     const db = getDb();
     return db
@@ -62,36 +78,11 @@ class Product {
       .collection("products")
       .deleteOne({ _id: new mongodb.ObjectId(prodId) })
       .then((result) => {
-        console.log(result);
+        console.log("Product deleted");
       })
       .catch((err) => {
         console.log(err);
         throw err;
-      });
-  }
-  static updateById(
-    prodId,
-    updatedTitle,
-    updatedImageUrl,
-    updatedDescription,
-    updatedPrice,
-  ) {
-    const db = getDb();
-    return db
-      .collection("products")
-      .updateOne(
-        { _id: new mongodb.ObjectId(prodId) },
-        {
-          $set: {
-            title: updatedTitle,
-            imageUrl: updatedImageUrl,
-            description: updatedDescription,
-            price: updatedPrice,
-          },
-        },
-      )
-      .then((result) => {
-        console.log(result);
       });
   }
 }

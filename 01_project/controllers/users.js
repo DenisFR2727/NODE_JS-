@@ -10,36 +10,31 @@ exports.getAddUser = (req, res, next) => {
 exports.getUser = (req, res, next) => {
   const userId = req.params.userId;
 
-  User.findByPk(userId)
-    .then((user) => {
-      if (!user) {
-        return res.redirect("/users");
-      }
-      // res.redirect("/user/user-details");
-      res.render("user/user-details", {
-        user: user,
-        pageTitle: "User Details",
-        path: "/user/user-details",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.redirect("/users");
+  User.findById(userId).then((user) => {
+    if (!user) {
+      return res.redirect("/users");
+    }
+    res.render("user/user-details", {
+      user: user,
+      pageTitle: user.username,
+      path: "/users",
     });
+  });
 };
 
 exports.postAddUser = (req, res, next) => {
-  const name = req.body.name?.trim();
+  const username = req.body.username?.trim();
   const email = req.body.email?.trim();
 
-  if (!name || !email) {
+  if (!username || !email) {
     return res.redirect("/add-user");
   }
 
-  User.create({ name, email })
-    .then((user) => {
-      // console.log(user);
-
+  const user = new User(null, username, email);
+  user
+    .save()
+    .then(() => {
+      console.log("User created");
       res.redirect("/users");
     })
     .catch((err) => {
@@ -50,7 +45,7 @@ exports.postAddUser = (req, res, next) => {
 
 // Route to Users
 exports.getUsers = (req, res, next) => {
-  User.findAll()
+  User.fetchAll()
     .then((users) => {
       res.render("user/users", {
         users: users,
@@ -67,14 +62,9 @@ exports.getUsers = (req, res, next) => {
 
 exports.deleteUser = (req, res, next) => {
   const userId = req.body.userId;
-  User.findByPk(userId)
-    .then((user) => {
-      if (!user) {
-        return;
-      }
-      return user.destroy();
-    })
+  User.deleteById(userId)
     .then(() => {
+      console.log("User deleted");
       res.redirect("/users");
     })
     .catch((err) => {

@@ -9,16 +9,16 @@
             <% users.forEach((user) => { %>
                <li>
                   <p>
-                  <%= user.name %>
+                  <%= user.username %>
                   </p>
                   <p>
                   <%= user.email %>
                   </p>
                   <p>
-                     <a href="/users/<%= user.id %>">Details</a>
+                     <a href="/users/<%= user._id %>">Details</a>
                   </p>
                   <form action="/delete-user" method="POST">
-                     <input type="hidden" name="userId" value="<%= user.id %>">
+                     <input type="hidden" name="userId" value="<%= user._id %>">
                      <button type="submit">Delete</button>
                   </form>
             </li>

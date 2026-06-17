@@ -5,7 +5,7 @@ const path = require("path");
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-// const usersRoutes = require("./routes/users");
+const usersRoutes = require("./routes/users");
 // const cartRoutes = require("./routes/shop");
 // const adminProductsRoutes = require("./routes/admin");
 // const checkoutRoutes = require("./routes/shop");
@@ -13,6 +13,7 @@ const productDetailsRoutes = require("./routes/shop");
 
 const error404Controller = require("./controllers/404");
 const mongoConnect = require("./util/database").mongoConnect;
+const User = require("./models/users");
 
 const app = express(); // створюємо екземпляр express
 
@@ -26,19 +27,21 @@ app.use(express.static(path.join(__dirname, "scripts")));
 
 // middleware для авторизації користувача
 app.use((req, res, next) => {
-  next();
-  //   User.findByPk(1)
-  //     .then((user) => {
-  //       req.user = user;
-  //       next();
-  //     })
-  //     .catch((err) => console.log(err));
+  User.findById("6a3284e40189ba13bfe8d57e")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => {
+      console.log(err);
+      next();
+    });
 });
 
 app.use("/admin", adminData);
 app.use(shopRoutes);
 
-// app.use(usersRoutes);
+app.use(usersRoutes);
 
 // cartRoutes for cart
 // app.use("/cart", cartRoutes);

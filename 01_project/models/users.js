@@ -2,10 +2,11 @@ const mongodb = require("mongodb");
 const getDb = require("../util/database").getDb;
 
 class User {
-  constructor(id, username, email) {
+  constructor(id, username, email, cart) {
     this._id = id || null;
     this.username = username;
     this.email = email;
+    this.cart = cart;
   }
   save() {
     const db = getDb();
@@ -20,6 +21,45 @@ class User {
       .catch((err) => {
         console.log(err);
         throw err;
+      });
+  }
+
+  addToCart(product) {
+    const cartItems = this.cart && this.cart.items ? [...this.cart.items] : [];
+    const prodId = product._id.toString();
+    let newQuantity = 1;
+
+    const index = cartItems.findIndex(
+      (item) => item._id.toString() === prodId,
+    );
+
+    if (index >= 0) {
+      newQuantity = cartItems[index].quantity + 1;
+      cartItems[index].quantity = newQuantity;
+    } else {
+      cartItems.push({
+        _id: new mongodb.ObjectId(product._id),
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        userId: new mongodb.ObjectId(this._id),
+        quantity: newQuantity,
+      });
+    }
+
+    const updatedCart = { items: cartItems };
+    const db = getDb();
+
+    return db
+      .collection("users")
+      .updateOne(
+        { _id: new mongodb.ObjectId(this._id) },
+        { $set: { cart: updatedCart } },
+      )
+      .then((result) => {
+        this.cart = updatedCart;
+        return result;
       });
   }
 

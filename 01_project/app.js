@@ -2,6 +2,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
+const mongoConnect = require("./util/database").mongoConnect;
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -12,7 +13,7 @@ const usersRoutes = require("./routes/users");
 const productDetailsRoutes = require("./routes/shop");
 
 const error404Controller = require("./controllers/404");
-const mongoConnect = require("./util/database").mongoConnect;
+
 const User = require("./models/users");
 
 const app = express(); // створюємо екземпляр express
@@ -29,7 +30,7 @@ app.use(express.static(path.join(__dirname, "scripts")));
 app.use((req, res, next) => {
   User.findById("6a3284e40189ba13bfe8d57e")
     .then((user) => {
-      req.user = user;
+      req.user = new User(user._id, user.username, user.email, user.cart);
       next();
     })
     .catch((err) => {

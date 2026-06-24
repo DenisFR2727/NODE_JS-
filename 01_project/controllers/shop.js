@@ -1,9 +1,10 @@
 const Product = require("../models/product");
-const Order = require("../models/order");
+// const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
+      console.log(products);
       res.render("shop/product-list", {
         products: products,
         pageTitle: "Shop",
@@ -42,7 +43,7 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         products: products,

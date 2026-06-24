@@ -1,20 +1,19 @@
 // const http = require("http");
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+
 const path = require("path");
-const mongoConnect = require("./util/database").mongoConnect;
+// const mongoConnect = require("./util/database").mongoConnect;
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-const usersRoutes = require("./routes/users");
-// const cartRoutes = require("./routes/shop");
-// const adminProductsRoutes = require("./routes/admin");
-// const checkoutRoutes = require("./routes/shop");
-const productDetailsRoutes = require("./routes/shop");
+// const usersRoutes = require("./routes/users");
+// const productDetailsRoutes = require("./routes/shop");
 
 const error404Controller = require("./controllers/404");
 
-const User = require("./models/users");
+// const User = require("./models/users");
 
 const app = express(); // створюємо екземпляр express
 
@@ -27,125 +26,43 @@ app.use(express.static(path.join(__dirname, "public"))); // використов
 app.use(express.static(path.join(__dirname, "scripts")));
 
 // middleware для авторизації користувача
-app.use((req, res, next) => {
-  User.findById("6a3284e40189ba13bfe8d57e")
-    .then((user) => {
-      req.user = new User(user._id, user.username, user.email, user.cart);
-      next();
-    })
-    .catch((err) => {
-      console.log(err);
-      next();
-    });
-});
+// app.use((req, res, next) => {
+//   User.findById("6a3284e40189ba13bfe8d57e")
+//     .then((user) => {
+//       req.user = new User(user._id, user.username, user.email, user.cart);
+//       next();
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//       next();
+//     });
+// });
 
 app.use("/admin", adminData);
 app.use(shopRoutes);
 
-app.use(usersRoutes);
+// app.use(usersRoutes);
 
-// cartRoutes for cart
-// app.use("/cart", cartRoutes);
-// app.use(cartRoutes);
-
-// adminProductsRoutes for admin/products
-// app.use("/admin/products", adminProductsRoutes);
-// app.use(adminProductsRoutes);
-
-// checkoutRoutes for checkout
-// app.use("/checkout", checkoutRoutes);
-// app.use(checkoutRoutes);
-
-app.use("/products/:productId", productDetailsRoutes);
-app.use(productDetailsRoutes);
+// app.use("/products/:productId", productDetailsRoutes);
+// app.use(productDetailsRoutes);
 
 // підключили маршрут для обробки помилок
 app.use(error404Controller.get404);
 
-mongoConnect(() => {
-  app.listen(3001);
-});
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-// const sequelize = require("./util/database");
+mongoose
+  .connect(
+    "mongodb+srv://dh92fr_db_user:Specialized8110@clusters.4wo2tpe.mongodb.net/shop?appName=Clusters",
+  )
+  .then((result) => {
+    app.listen(3001);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
-// const Product = require("./models/product");
-// const Cart = require("./models/cart");
-// const User = require("./models/users");
-// const CartItem = require("./models/cart-item");
-
-// const Order = require("./models/order");
-// const OrderItem = require("./models/order-item");
-
-// Product model
-// Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
-// User.hasMany(Product);
-
-// // Cart model
-// // Cart.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
-// User.hasOne(Cart); // User має один Cart
-// Cart.hasMany(CartItem); // Cart має багато CartItem
-// Cart.belongsTo(User); // Cart належить до User
-// Cart.belongsToMany(Product, { through: CartItem }); // Cart має багато Product через CartItem
-// Product.belongsToMany(Cart, { through: CartItem }); // Product має багато Cart через CartItem
-
-// // Order model
-// Order.belongsTo(User); // Order належить до User
-// User.hasMany(Order); // User має багато Order
-// Order.belongsToMany(Product, { through: OrderItem }); // Order має багато Product через OrderItem
-// Product.belongsToMany(Order, { through: OrderItem }); // Product має багато Order через OrderItem
-
-// // .sync({ force: true }) => видаляє всі дані з бази даних та створює нові таблиці
-// sequelize
-//   .sync()
-//   .then((result) => {
-//     return User.findByPk(1);
-//   })
-//   .then((user) => {
-//     if (!user) {
-//       return User.create({ name: "Max", email: "test@test.com" });
-//     }
-//     return user;
-//   })
-//   .then((user) => {
-//     user.createCart();
-//   })
-//   .then((cart) => {
-//     app.listen(3001);
-//   })
-//   .catch((err) => console.log(err));
-
-// app.listen(3001);
-
-// sendFile(path.join(__dirname, "views", "not-found.html"));
-// { extended: false } - що б він міг розбирати функції які не використовуються за замовчуванням
-// __dirname → абсолютний шлях до папки файлу
-
-// use - Приймає масив обробників а також має інші випадки використання
-// use - приймає функцію з трьома аргументами (req, res, next), next це ще одна функція яка повинна бути виконана .
-// next - це функція яка переходить до наступної дії низче!
-
-// const server = http.createServer(app);
-// server.listen(3001);
-
-// бібліотека Express.js використовується для створення веб-серверів та API. Вона сильно спрощує роботу з HTTP.
-// use() — це метод для підключення middleware.
-
-// Middleware — це функція, яка виконується між request і response.
-
-// npm install --save body-parser
-
-// res.send("<h1>The Add  Product Page</h1>"); // Дозволяє приєднати тіло будь-якого типу.
-
-//  res.status() = код статусу який
-
-// const expressHbs = require("express-handlebars");
-
-// app.engine("hbs", expressHbs()); // вказуємо який шаблон використовувати
-// app.engine(
-//   "hbs",
-//   expressHbs.engine({
-//     extname: ".hbs",
-//     layoutsDir: "views/layouts/",
-//     defaultLayout: "main-layouts",
-//   }),
-// );
+// mongoConnect(() => {
+//   app.listen(3001);
+// });

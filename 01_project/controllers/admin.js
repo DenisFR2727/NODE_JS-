@@ -34,21 +34,21 @@ exports.postAddProduct = (req, res, next) => {
   const description = req.body.description;
   const price = req.body.price;
 
-  const product = new Product(
-    null,
-    title,
-    price,
-    imageUrl,
-    description,
-    req.user._id,
-  );
+  const product = new Product({
+    title: title,
+    price: price,
+    imageUrl: imageUrl,
+    description: description,
+  });
   product
     .save()
-    .then(() => {
+    .then((result) => {
+      console.log("Created Product");
       res.redirect("/admin/products");
     })
     .catch((err) => console.log(err));
 };
+
 // Update Product
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -99,13 +99,3 @@ exports.getProducts = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
-
-// Sequelize version
-// createProduct() - метод для створення продукту в моделі Product
-//   req.user
-//     .createProduct({
-//       title,
-//       imageUrl,
-//       description,
-//       price: parseFloat(price),
-//     })

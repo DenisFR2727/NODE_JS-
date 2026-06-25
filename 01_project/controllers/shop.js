@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const mongoose = require("mongoose");
 // const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
@@ -17,6 +18,10 @@ exports.getProducts = (req, res, next) => {
 //  Запит до бази даних для отримання продукту за id
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
+
+  //   if (!mongoose.Types.ObjectId.isValid(prodId)) {
+  //     return res.redirect("/");
+  //   }
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
@@ -24,11 +29,14 @@ exports.getProduct = (req, res, next) => {
       }
       res.render("shop/product-details", {
         product: product,
-        pageTitle: product._id,
-        path: "/products/" + product._id,
+        pageTitle: product.title,
+        path: "/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      res.redirect("/");
+    });
 };
 
 // Route to Checkout
@@ -57,8 +65,9 @@ exports.getIndex = (req, res, next) => {
 // Route to Cart
 exports.getCart = (req, res, next) => {
   req.user
-    .getCart()
-    .then((products) => {
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items;
       res.render("shop/cart", {
         products: products,
         pageTitle: "Your Cart",
@@ -66,20 +75,6 @@ exports.getCart = (req, res, next) => {
       });
     })
     .catch((err) => console.log(err));
-  //   const cartItems =
-  //     req.user.cart && req.user.cart.items ? req.user.cart.items : [];
-  //   const products = cartItems.map((item) => ({
-  //     _id: item._id,
-  //     title: item.title,
-  //     price: item.price,
-  //     imageUrl: item.imageUrl,
-  //     cartItem: { quantity: item.quantity },
-  //   }));
-  //   res.render("shop/cart", {
-  //     products: products,
-  //     pageTitle: "Your Cart",
-  //     path: "/cart",
-  //   });
 };
 
 exports.postCart = (req, res, next) => {
@@ -107,7 +102,7 @@ exports.postCartDeleteItem = (req, res, next) => {
     return res.redirect("/");
   }
   req.user
-    .deleteProductFromCart(prodId)
+    .deleteItemFromCart(prodId)
     .then((result) => {
       console.log(result);
       res.redirect("/cart");

@@ -8,12 +8,12 @@ const path = require("path");
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-// const usersRoutes = require("./routes/users");
+const usersRoutes = require("./routes/users");
 // const productDetailsRoutes = require("./routes/shop");
 
 const error404Controller = require("./controllers/404");
 
-// const User = require("./models/users");
+const User = require("./models/users");
 
 const app = express(); // створюємо екземпляр express
 
@@ -26,22 +26,22 @@ app.use(express.static(path.join(__dirname, "public"))); // використов
 app.use(express.static(path.join(__dirname, "scripts")));
 
 // middleware для авторизації користувача
-// app.use((req, res, next) => {
-//   User.findById("6a3284e40189ba13bfe8d57e")
-//     .then((user) => {
-//       req.user = new User(user._id, user.username, user.email, user.cart);
-//       next();
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       next();
-//     });
-// });
+app.use((req, res, next) => {
+  User.findById("6a3d1a973ac46416150054e0")
+    .then((user) => {
+      req.user = user; // додаємо користувача до request
+      next();
+    })
+    .catch((err) => {
+      console.log(err);
+      next();
+    });
+});
 
 app.use("/admin", adminData);
 app.use(shopRoutes);
 
-// app.use(usersRoutes);
+app.use(usersRoutes);
 
 // app.use("/products/:productId", productDetailsRoutes);
 // app.use(productDetailsRoutes);
@@ -57,6 +57,18 @@ mongoose
     "mongodb+srv://dh92fr_db_user:Specialized8110@clusters.4wo2tpe.mongodb.net/shop?appName=Clusters",
   )
   .then((result) => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          username: "Max",
+          email: "max@test.com",
+          cart: { items: [] },
+        });
+        return user.save();
+      }
+      return user;
+    });
+
     app.listen(3001);
   })
   .catch((err) => {

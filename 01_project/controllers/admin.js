@@ -1,7 +1,7 @@
 const Product = require("../models/product");
-const mongodb = require("mongodb");
+// const mongodb = require("mongodb");
 
-const ObjectId = mongodb.ObjectId; // для перетворення id з string в ObjectId
+// const ObjectId = mongodb.ObjectId; // для перетворення id з string в ObjectId
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -39,6 +39,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     imageUrl: imageUrl,
     description: description,
+    userId: req.user,
   });
   product
     .save()
@@ -57,16 +58,14 @@ exports.postEditProduct = (req, res, next) => {
   const updatedDescription = req.body.description;
   const updatedPrice = req.body.price;
 
-  const product = new Product(
-    new ObjectId(prodId),
-    updatedTitle,
-    updatedPrice,
-    updatedImageUrl,
-    updatedDescription,
-  );
-
-  product
-    .save()
+  Product.findById(prodId)
+    .then((product) => {
+      product.title = updatedTitle;
+      product.imageUrl = updatedImageUrl;
+      product.description = updatedDescription;
+      product.price = updatedPrice;
+      return product.save();
+    })
     .then(() => {
       console.log("Product updated");
       res.redirect("/admin/products");
@@ -76,7 +75,7 @@ exports.postEditProduct = (req, res, next) => {
 // Delete Product
 exports.deleteProductById = (req, res, next) => {
   const prodId = req.params.productId;
-  Product.deleteById(prodId)
+  Product.findByIdAndDelete(prodId)
     .then(() => {
       console.log("Destroyed Product");
       res.redirect("/admin/products");
@@ -86,8 +85,11 @@ exports.deleteProductById = (req, res, next) => {
 
 // Route to Admin Products
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
+    //  .select("price")
+    //  .populate("userId")
     .then((products) => {
+      console.log(products);
       res.render("admin/products", {
         products,
         pageTitle: "Admin Products",

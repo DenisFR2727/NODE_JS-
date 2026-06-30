@@ -4,12 +4,11 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 const path = require("path");
-// const mongoConnect = require("./util/database").mongoConnect;
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const usersRoutes = require("./routes/users");
-// const productDetailsRoutes = require("./routes/shop");
+const authRoutes = require("./routes/auth");
 
 const error404Controller = require("./controllers/404");
 
@@ -42,9 +41,7 @@ app.use("/admin", adminData);
 app.use(shopRoutes);
 
 app.use(usersRoutes);
-
-// app.use("/products/:productId", productDetailsRoutes);
-// app.use(productDetailsRoutes);
+app.use(authRoutes);
 
 // підключили маршрут для обробки помилок
 app.use(error404Controller.get404);

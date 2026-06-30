@@ -26,12 +26,21 @@ form {
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .main-header__nav {
+  width: 100%;
   height: 100%;
   display: none;
   align-items: center;
+  justify-content: space-between;
+}
+
+.menu-toggle {
+  display: block;
+  flex-shrink: 0;
 }
 
 .main-header__item-list {
@@ -39,10 +48,13 @@ form {
   margin: 0;
   padding: 0;
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .main-header__item {
-  margin: 0 1rem;
+  margin: 0;
   padding: 0;
 }
 
@@ -54,6 +66,25 @@ form {
 .main-header__item a:hover,
 .main-header__item a:active,
 .main-header__item a.active {
+  color: #ffeb3b;
+}
+
+.login-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.login-link a {
+  text-decoration: none;
+  color: white;
+}
+
+.login-link a:hover,
+.login-link a:active,
+.login-link a.active {
   color: #ffeb3b;
 }
 
@@ -103,20 +134,25 @@ form {
   border-radius: 3px;
 }
 
+.menu-toggle,
 #side-menu-toggle {
   border: 1px solid white;
   font: inherit;
-  padding: 0.5rem;
-  display: block;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.25rem;
+  line-height: 1;
   background: transparent;
   color: white;
   cursor: pointer;
 }
 
+.menu-toggle:focus,
 #side-menu-toggle:focus {
   outline: none;
 }
 
+.menu-toggle:active,
+.menu-toggle:hover,
 #side-menu-toggle:active,
 #side-menu-toggle:hover {
   color: #ffeb3b;
@@ -132,6 +168,10 @@ form {
   background: rgba(0, 0, 0, 0.5);
   z-index: 5;
   display: none;
+}
+
+.backdrop.open {
+  display: block;
 }
 
 .grid {
@@ -196,13 +236,28 @@ form {
   color: white;
 }
 
+@media (max-width: 767px) {
+  .main-header__nav {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+}
+
 @media (min-width: 768px) {
   .main-header__nav {
     display: flex;
   }
 
-  #side-menu-toggle {
+  .menu-toggle {
     display: none;
+  }
+
+  .mobile-nav,
+  .backdrop {
+    display: none !important;
   }
 }
 .centered {

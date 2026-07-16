@@ -9,6 +9,7 @@ exports.getProducts = (req, res, next) => {
         products: products,
         pageTitle: "Shop",
         path: "/products",
+        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -18,9 +19,6 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
 
-  //   if (!mongoose.Types.ObjectId.isValid(prodId)) {
-  //     return res.redirect("/");
-  //   }
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
@@ -30,6 +28,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: "/products",
+        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -56,6 +55,7 @@ exports.getIndex = (req, res, next) => {
         products: products,
         pageTitle: "Shop",
         path: "/",
+        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -71,6 +71,7 @@ exports.getCart = (req, res, next) => {
         products: products,
         pageTitle: "Your Cart",
         path: "/cart",
+        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -108,6 +109,7 @@ exports.postCartDeleteItem = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+
 exports.postOrder = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
@@ -143,6 +145,7 @@ exports.getOrders = (req, res, next) => {
         orders: orders,
         pageTitle: "Your Orders",
         path: "/orders",
+        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));

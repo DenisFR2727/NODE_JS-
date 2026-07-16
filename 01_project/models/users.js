@@ -69,6 +69,17 @@ userSchema.methods.clearCart = function () {
   return this.save();
 };
 
+userSchema.statics.createUser = function (username, email) {
+  return this.create({
+    username,
+    email,
+    cart: { items: [] },
+  });
+};
+userSchema.statics.deleteUserById = function (userId) {
+  return this.deleteOne({ _id: userId });
+};
+
 module.exports = mongoose.model("User", userSchema);
 
 // const mongodb = require("mongodb");

@@ -4,6 +4,7 @@ exports.getAddUser = (req, res, next) => {
   res.render("admin/add-user", {
     pageTitle: "Add User",
     path: "/add-user",
+    isAuthenticated: req.isLoggedIn,
   });
 };
 
@@ -18,6 +19,7 @@ exports.getUser = (req, res, next) => {
       user: user,
       pageTitle: user.username,
       path: "/users",
+      isAuthenticated: req.isLoggedIn,
     });
   });
 };
@@ -30,9 +32,7 @@ exports.postAddUser = (req, res, next) => {
     return res.redirect("/add-user");
   }
 
-  const user = new User(null, username, email);
-  user
-    .save()
+  User.createUser(username, email)
     .then(() => {
       console.log("User created");
       res.redirect("/users");
@@ -45,13 +45,14 @@ exports.postAddUser = (req, res, next) => {
 
 // Route to Users
 exports.getUsers = (req, res, next) => {
-  User.fetchAll()
+  User.find()
     .then((users) => {
       res.render("user/users", {
         users: users,
         pageTitle: "User Page",
         path: "/users",
         activeUser: true,
+        isAuthenticated: req.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -62,7 +63,7 @@ exports.getUsers = (req, res, next) => {
 
 exports.deleteUser = (req, res, next) => {
   const userId = req.body.userId;
-  User.deleteById(userId)
+  User.deleteUserById(userId)
     .then(() => {
       console.log("User deleted");
       res.redirect("/users");

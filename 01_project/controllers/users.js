@@ -4,7 +4,7 @@ exports.getAddUser = (req, res, next) => {
   res.render("admin/add-user", {
     pageTitle: "Add User",
     path: "/add-user",
-    isAuthenticated: req.isLoggedIn,
+    isAuthenticated: !!req.session.isLoggedIn,
   });
 };
 
@@ -19,7 +19,7 @@ exports.getUser = (req, res, next) => {
       user: user,
       pageTitle: user.username,
       path: "/users",
-      isAuthenticated: req.isLoggedIn,
+      isAuthenticated: !!req.session.isLoggedIn,
     });
   });
 };
@@ -52,7 +52,7 @@ exports.getUsers = (req, res, next) => {
         pageTitle: "User Page",
         path: "/users",
         activeUser: true,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: !!req.session.isLoggedIn,
       });
     })
     .catch((err) => {

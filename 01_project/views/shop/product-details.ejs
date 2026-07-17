@@ -11,6 +11,8 @@
       <div><img class="product-detail-image" src="<%= product.imageUrl %>" alt="<%= product.title %>"></div>
       <h2>Price: <%= product.price %></h2>
       <p><%= product.description %></p>
+      <% if (isAuthenticated) { %>
       <%- include('../includes/add-to-cart.ejs', { product: product }) %>
+      <% } %>
     </main>
 <%- include('../includes/end.ejs') %>

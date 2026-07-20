@@ -101,7 +101,10 @@ exports.postOrder = (req, res, next) => {
     .populate("cart.items.productId")
     .then((user) => {
       const products = user.cart.items.map((i) => {
-        return { quantity: i.quantity, product: { ...i.productId._doc } };
+        return {
+          quantity: i.quantity,
+          product: i.productId.toObject(),
+        };
       });
       const order = new Order({
         user: {
@@ -127,10 +130,22 @@ exports.getOrders = (req, res, next) => {
   }
   Order.find({ "user.userId": req.user._id })
     .then((orders) => {
+      const normalizedOrders = orders.map((order) => ({
+        _id: order._id,
+        products: order.products.map((item) => ({
+          title:
+            (item.product && item.product.title) ||
+            (item.productData && item.productData.title) ||
+            item.title ||
+            "Unknown product",
+          quantity: item.quantity,
+        })),
+      }));
+
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
-        orders: orders,
+        orders: normalizedOrders,
         isAuthenticated: req.session.isLoggedIn,
       });
     })
